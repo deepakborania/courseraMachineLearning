@@ -39,6 +39,19 @@ Theta2_grad = zeros(size(Theta2));
 %         cost function computation is correct by verifying the cost
 %         computed in ex4.m
 %
+encodedY = zeros(m, num_labels);
+for i=1:m
+  encodedY(i,y(i)) = 1;
+end
+newX = [ones(size(X)(1),1),X];
+a1 = sigmoid(newX * Theta1');
+h = sigmoid([ones(size(a1)(1),1),a1] * Theta2');
+for i=1:m
+  J = J + (-(encodedY(i,:) * log(h(i,:))') - ((1-encodedY(i,:)) * log(1 - h(i,:))'));
+end
+J = J/m;
+
+J = J + (lambda/(2*m))*(sum((Theta1(:,2:size(Theta1)(2)).^2)(:)) + sum((Theta2(:,2:size(Theta2)(2)).^2)(:)))
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
 %         the cost function with respect to Theta1 and Theta2 in Theta1_grad and
