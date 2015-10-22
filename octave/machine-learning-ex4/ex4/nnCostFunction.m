@@ -51,7 +51,7 @@ for i=1:m
 end
 J = J/m;
 
-J = J + (lambda/(2*m))*(sum((Theta1(:,2:size(Theta1)(2)).^2)(:)) + sum((Theta2(:,2:size(Theta2)(2)).^2)(:)))
+J = J + (lambda/(2*m))*(sum((Theta1(:,2:size(Theta1)(2)).^2)(:)) + sum((Theta2(:,2:size(Theta2)(2)).^2)(:)));
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
 %         the cost function with respect to Theta1 and Theta2 in Theta1_grad and
@@ -67,6 +67,27 @@ J = J + (lambda/(2*m))*(sum((Theta1(:,2:size(Theta1)(2)).^2)(:)) + sum((Theta2(:
 %               over the training examples if you are implementing it for the 
 %               first time.
 %
+Delta_2 = zeros(num_labels, hidden_layer_size+1);
+Delta_1 = zeros(hidden_layer_size, input_layer_size+1);
+for t = 1:m
+   a_1 = [1, X(t, :)];
+   z_2 = a_1 * Theta1';
+   a_2 = sigmoid(z_2);
+   a_2 = [1, a_2];
+   z_3 = a_2 * Theta2';
+   a_3 = sigmoid(z_3);
+   
+   del_3 = a_3 - encodedY(t, :);
+   del_2 = (Theta2(:, 2:end)' * del_3'.*sigmoidGradient(z_2)')';
+   
+   Delta_2 = Delta_2 + (del_3' * a_2);
+   Delta_1 = Delta_1 + (del_2' * a_1);
+end
+%Delta_1 = [zeros(hidden_layer_size,1), Delta_1]
+%Delta_2 = [zeros(num_labels,1), Delta_2]
+Theta1_grad = (Delta_1)/m;
+Theta2_grad = (Delta_2)/m;
+
 % Part 3: Implement regularization with the cost function and gradients.
 %
 %         Hint: You can implement this around the code for
@@ -75,7 +96,13 @@ J = J + (lambda/(2*m))*(sum((Theta1(:,2:size(Theta1)(2)).^2)(:)) + sum((Theta2(:
 %               and Theta2_grad from Part 2.
 %
 
-
+if (lambda ==0)
+  Theta1_grad = (Delta_1)/m;
+  Theta2_grad = (Delta_2)/m;
+else
+  Theta1_grad = [(Delta_1(:,1))/m, (Delta_1(:,2:end) + (lambda * Theta1(:,2:end)))/m];
+  Theta2_grad = [(Delta_2(:,1))/m, (Delta_2(:,2:end) + (lambda * Theta2(:,2:end)))/m];
+end
 
 
 
